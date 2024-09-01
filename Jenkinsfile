@@ -1,84 +1,81 @@
 pipeline {
     agent any
-
+    
     stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean package' // Example using Maven
+                echo 'Fetching the source code from the directory path specified by the environment variable.'
+                echo 'Compiling the code and generating any necessary artifacts.'
+                sh 'mvn clean package' // Assuming Maven is used for the build
             }
         }
-        
+
         stage('Unit and Integration Tests') {
             steps {
-                echo 'Running Unit and Integration Tests...'
-                sh 'mvn test' // Example using Maven for unit tests
-                sh 'mvn verify' // Example for integration tests
-            }
-            post {
-                always {
-                    script {
-                        // Save logs to a file
-                        def logFile = "unit_integration_tests.log"
-                        writeFile file: logFile, text: currentBuild.rawBuild.getLog(1000).join("\n")
-                        
-                        // Send email with the log file attached
-                        mail to: 'wahidhashimiadler2018@gmail.com',
-                             subject: "Jenkins Pipeline: Unit and Integration Tests - ${currentBuild.currentResult}",
-                             body: "The Unit and Integration Tests stage has ${currentBuild.currentResult}.\nCheck console output at ${env.BUILD_URL}.",
-                             attachmentsPattern: logFile
-                    }
-                }
+                echo 'Running unit tests.'
+                sh 'mvn test'
+                echo 'Running integration tests.'
+                sh 'mvn verify'
             }
         }
-        
+
         stage('Code Analysis') {
             steps {
-                echo 'Analyzing the code...'
-                sh 'sonar-scanner' // Example using SonarQube
+                echo 'Checking the quality of the code using a code analysis tool.'
+                sh 'sonar-scanner' // Assuming SonarQube is used for code analysis
             }
         }
-        
+
         stage('Security Scan') {
             steps {
-                echo 'Performing Security Scan...'
-                sh 'npm audit' // Example using npm audit or OWASP Dependency-Check
-            }
-            post {
-                always {
-                    script {
-                        // Save logs to a file
-                        def logFile = "security_scan.log"
-                        writeFile file: logFile, text: currentBuild.rawBuild.getLog(1000).join("\n")
-                        
-                        // Send email with the log file attached
-                        mail to: 'wahidhashimiadler2018@gmail.com',
-                             subject: "Jenkins Pipeline: Security Scan - ${currentBuild.currentResult}",
-                             body: "The Security Scan stage has ${currentBuild.currentResult}.\nCheck console output at ${env.BUILD_URL}.",
-                             attachmentsPattern: logFile
-                    }
-                }
+                echo 'Identifying vulnerabilities using a security scanning tool.'
+                sh 'npm audit' // Assuming npm audit or a similar tool is used for security scanning
             }
         }
-        
-        stage('Deploy to Staging') {
-            steps {
-                echo 'Deploying to Staging...'
-                sh 'scp target/app.war user@staging-server:/path/to/deploy/' // Example using SCP
-            }
-        }
-        
+
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running Integration Tests on Staging...'
-                // Example integration tests on staging
+                echo 'Running integration tests on the staging environment.'
+                // Add your specific commands for staging environment integration tests
             }
         }
-        
+
         stage('Deploy to Production') {
             steps {
-                echo 'Deploying to Production...'
-                sh 'scp target/app.war user@production-server:/path/to/deploy/' // Example using SCP
+                echo 'Deploying the code to the production environment.'
+                // Add your specific commands for deployment
+            }
+        }
+    }
+    
+    post {
+        always {
+            script {
+                def logFile = "build-log-${env.BUILD_NUMBER}.txt"
+                def logZip = "build-log-${env.BUILD_NUMBER}.zip"
+                
+                // Save build logs to a file
+                writeFile file: logFile, text: currentBuild.rawBuild.getLog().join("\n")
+                
+                // Compress the log file
+                sh "zip ${logZip} ${logFile}"
+                
+                // Send email with the compressed log file attached
+                emailext(
+                    to: 'youremail@example.com',
+                    subject: "Jenkins Pipeline: Build ${currentBuild.fullDisplayName} - ${currentBuild.currentResult}",
+                    body: "The build has completed with status: ${currentBuild.currentResult}.\nCheck console output at ${env.BUILD_URL}.",
+                    attachmentsPattern: logZip
+                )
+                
+                // Clean up the log file and the zip
+                sh "rm ${logFile} ${logZip}"
             }
         }
     }
