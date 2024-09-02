@@ -79,7 +79,7 @@ pipeline {
                 
             }
         }
-        stage('Building again') {
+        stage('Building') {
             steps {
                 echo 'Building'
                 
