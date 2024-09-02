@@ -87,5 +87,11 @@ pipeline {
                 
             }
         }
+        stage('Building') {
+            steps {
+                echo 'building again'
+                
+            }
+        }
     }
 }
