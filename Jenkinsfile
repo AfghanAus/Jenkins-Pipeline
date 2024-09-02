@@ -17,19 +17,19 @@ pipeline {
             post {
                 failure {  
                         // Send email with the log file attached
-                        archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
+                        
                         mail to: 'wahidhashimiadler2018@gmail.com',
                              subject: currentBuild.result,
-                             body: "Test Failed",
-                             attachmentspattern: '**/target/*.log'
+                             body: "Test Failed"
+                             
                              
                     }
                 success{
-                    archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
+                    
                     mail to:'wahidhashimiadler2018@gmail.com',
                     subject: currentBuild.result,
-                    body: "Test was successfull",
-                    attachmentspattern: '**/target/*.log'
+                    body: "Test was successfull"
+                    
                     }
                 }
         }
@@ -49,19 +49,19 @@ pipeline {
             post {
                 failure {  
                         // Send email with the log file attached
-                        archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
+                        
                         mail to: 'wahidhashimiadler2018@gmail.com',
                              subject: currentBuild.result,
-                             body: "Scan Failed",
-                             attachmentspattern: '**/target/*.log'
+                             body: "Scan Failed"
+                        
                              
                     }
                 success{
-                    archiveArtifacts artifacts: '**/target/*.log', allowEmptyArchive: true
+                    
                     mail to:'wahidhashimiadler2018@gmail.com',
                         subject: currentBuild.result,
-                        body: "Scan was successfull",
-                        attachmentspattern: '**/target/*.log'
+                        body: "Scan was successfull"
+                        
                     }
                 }
             
